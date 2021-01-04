@@ -3,7 +3,7 @@ import { useRecoilState } from "recoil"
 import cartAtom from "../../recoil/cart-atom"
 import tw from "twin.macro"
 
-export const InventoryItem = ({ title, imageUrl, productId, price }) => {
+export const InventoryItem = ({ title, imageSrc, _id: productId, price }) => {
   const [cartState, setCartState] = useRecoilState(cartAtom)
 
   const numberInCart =
@@ -40,8 +40,7 @@ export const InventoryItem = ({ title, imageUrl, productId, price }) => {
       <div>
         <div
           style={{
-            backgroundImage:
-              "url('https://burst.shopifycdn.com/photos/young-man-in-bright-fashion_925x.jpg')",
+            backgroundImage: `url('${imageSrc}')`,
           }}
           tw="bg-cover bg-center bg-gray-300 h-32 rounded"
         ></div>
@@ -49,6 +48,9 @@ export const InventoryItem = ({ title, imageUrl, productId, price }) => {
       <div tw="mt-6">
         <p tw="text-lg font-bold tracking-wide text-gray-600 mb-2">{title}</p>
       </div>
+      <p tw="text-lg font-bold tracking-wide text-green-600 mb-2">
+        ${price.toFixed(2)}
+      </p>
       <div tw="mt-6 flex justify-end">
         <button
           onClick={onAddItem}
