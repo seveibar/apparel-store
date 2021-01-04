@@ -1,0 +1,12 @@
+{
+  "name": "puzzl-interview",
+  "private": true,
+  "scripts": {
+    "start": "npm run start:database",
+    "start:database": "docker run --net -d host mongo",
+    "build:tailwind": "tailwindcss build src/tailwind.css -o src/tailwind.output.css"
+  },
+  "devDependencies": {
+    "lerna": "^3.22.1"
+  }
+}
