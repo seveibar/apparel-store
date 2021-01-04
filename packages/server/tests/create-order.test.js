@@ -31,10 +31,31 @@ test.serial("create customer test", async (t) => {
       city: "Brockport",
       zip: 14420,
       streetAddress: "123 Main Street",
+      paymentIntentId: "asd", //paymentIntent.id,
       paymentMethodId: paymentMethod.id,
     })
-    t.truthy(resData._id)
     t.truthy(resData.stripeCustomerId)
-    t.truthy(resData.stripePaymentMethodId)
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 200,
+      currency: "USD",
+      customer: resData.stripeCustomerId,
+      payment_method: paymentMethod.id,
+    })
+
+    const { data: orderRes } = await axios.post(`${url}/api/order`, {
+      customerId: resData._id,
+      totalCost: 2,
+      items: [
+        {
+          title: "Yard Stick",
+          price: 2,
+          quantity: 1,
+        },
+      ],
+      paymentIntentId: paymentIntent.id,
+    })
+    t.truthy(orderRes._id)
+    t.truthy(orderRes.totalCostCents)
   })
 })

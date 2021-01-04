@@ -2,6 +2,8 @@
 
 Build a multi-step customer checkout experience using React, Express, Node and the Stripe API.
 
+## Getting Started
+
 ## Motivation
 
 This repository was created as part of a timed skill assessment (weekend challenge).

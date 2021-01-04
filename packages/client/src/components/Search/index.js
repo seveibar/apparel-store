@@ -14,7 +14,6 @@ export const Search = () => {
         `/api/item?q=${encodeURIComponent(searchText)}`
       ).then((r) => r.json())
       setActiveItems(items)
-      console.log(items)
     }
     fetchResults()
   }, [searchText])

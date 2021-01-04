@@ -3,6 +3,10 @@ import tw from "twin.macro"
 import StickyFooter from "../StickyFooter"
 import usTerritoriesAndStates from "states-us"
 import { useHistory } from "react-router-dom"
+import customerAtom from "../../recoil/customer-atom"
+import cartAtom from "../../recoil/cart-atom"
+import paymentIntentAtom from "../../recoil/payment-intent-atom"
+import { useSetRecoilState, useRecoilValue } from "recoil"
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js"
 
 const states = usTerritoriesAndStates
@@ -11,36 +15,64 @@ const states = usTerritoriesAndStates
 
 export const CreditCardForm = () => {
   const stripe = useStripe()
+  const [loading, setLoading] = useState(false)
   const elements = useElements()
   const [fields, setField] = useReducer((state, action) => {
     return { ...state, [action.field]: action.value }
   }, {})
   const history = useHistory()
+  const setCustomer = useSetRecoilState(customerAtom)
+  const setPaymentIntent = useSetRecoilState(paymentIntentAtom)
+  const cart = useRecoilValue(cartAtom)
   const [error, setError] = useState()
+
+  const totalCost = cart.reduce((acc, item) => item.price + acc, 0)
+
   const onClickNext = async () => {
-    if (!stripe || !elements) return setError("Stripe/Elements not loaded")
-    const cardElement = elements.getElement(CardElement)
+    setLoading(true)
+    setError(null)
+    async function validateAndSubmit() {
+      if (!stripe || !elements) return setError("Stripe/Elements not loaded")
+      const cardElement = elements.getElement(CardElement)
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card: cardElement,
-    })
-    if (error) return setError(`An error occurred: ${error.toString()}`)
+      const { pmError, paymentMethod } = await stripe.createPaymentMethod({
+        type: "card",
+        card: cardElement,
+        billing_details: {
+          name: fields.firstName + " " + fields.lastName,
+        },
+      })
+      if (pmError) return setError(`An error occurred: ${pmError.message}`)
 
-    const customer = await fetch("/api/customer", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...fields,
-        paymentMethod,
-      }),
-    }).catch((e) => {
-      setError(e.toString())
-      return null
-    })
-    if (!customer) return
+      const customer = await fetch("/api/customer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...fields,
+          paymentMethodId: paymentMethod.id,
+        }),
+      })
+        .then((r) => r.json())
+        .catch((e) => {
+          setError(e.toString())
+          return null
+        })
+      if (!customer) return
+      setCustomer(customer)
 
-    history.push("/checkout/review")
+      const paymentIntent = await fetch("/api/payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId: customer._id,
+          totalCost,
+        }),
+      }).then((r) => r.json())
+      setPaymentIntent(paymentIntent)
+      history.push("/checkout/review")
+    }
+    await validateAndSubmit().catch((e) => null)
+    setLoading(false)
   }
 
   return (
@@ -58,6 +90,9 @@ export const CreditCardForm = () => {
               <input
                 tw="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-400 rounded py-3 px-4 mb-3"
                 type="text"
+                onChange={(e) =>
+                  setField({ field: "firstName", value: e.target.value })
+                }
                 placeholder="Jane"
               />
               {/* <p tw="text-red-500 text-xs italic">Please fill out this field.</p> */}
@@ -71,6 +106,9 @@ export const CreditCardForm = () => {
               </label>
               <input
                 tw="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-400 rounded py-3 px-4"
+                onChange={(e) =>
+                  setField({ field: "lastName", value: e.target.value })
+                }
                 type="text"
                 placeholder="Doe"
               />
@@ -88,6 +126,9 @@ export const CreditCardForm = () => {
                 tw="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-400 rounded py-3 px-4"
                 type="text"
                 placeholder="janedoe@example.com"
+                onChange={(e) =>
+                  setField({ field: "email", value: e.target.value })
+                }
               />
               <p tw="text-gray-600 text-xs italic">
                 You'll receive a purchase receipt at this email address.
@@ -102,6 +143,9 @@ export const CreditCardForm = () => {
                 <span tw="text-gray-500 italic pl-1 lowercase">(optional)</span>
               </label>
               <input
+                onChange={(e) =>
+                  setField({ field: "phone", value: e.target.value })
+                }
                 tw="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-400 rounded py-3 px-4"
                 type="text"
                 placeholder="123-456-7890"
@@ -114,11 +158,30 @@ export const CreditCardForm = () => {
                 tw="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
                 for="grid-city"
               >
+                Street Address
+              </label>
+              <input
+                tw="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-400 rounded py-3 px-4"
+                type="text"
+                onChange={(e) =>
+                  setField({ field: "streetAddress", value: e.target.value })
+                }
+                placeholder="123 Meadow Road"
+              />
+            </div>
+            <div tw="md:w-1/2 px-3 mb-6 md:mb-0">
+              <label
+                tw="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                for="grid-city"
+              >
                 City
               </label>
               <input
                 tw="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-400 rounded py-3 px-4"
                 type="text"
+                onChange={(e) =>
+                  setField({ field: "city", value: e.target.value })
+                }
                 placeholder="Albuquerque"
               />
             </div>
@@ -130,7 +193,12 @@ export const CreditCardForm = () => {
                 State
               </label>
               <div tw="relative">
-                <select tw="block appearance-none w-full bg-gray-100 border border-gray-400 text-gray-700 py-3 px-4 pr-8 rounded pl-6">
+                <select
+                  onChange={(e) =>
+                    setField({ field: "state", value: e.target.value })
+                  }
+                  tw="block appearance-none w-full bg-gray-100 border border-gray-400 text-gray-700 py-3 px-4 pr-8 rounded pl-6"
+                >
                   <option></option>
                   {states.map((s) => (
                     <option key={s}>{s}</option>
@@ -155,6 +223,9 @@ export const CreditCardForm = () => {
                 Zip
               </label>
               <input
+                onChange={(e) =>
+                  setField({ field: "zip", value: e.target.value })
+                }
                 tw="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-400 rounded py-3 px-4"
                 type="text"
                 placeholder="90210"
@@ -175,24 +246,24 @@ export const CreditCardForm = () => {
                     style: {
                       base: {
                         fontSize: "16px",
-                        // color: "#424770",
-                        "::placeholder": {
-                          // color: "#aab7c4",
-                        },
                       },
                       invalid: {
-                        // color: "#9e2146",
+                        color: "#9e2146",
                       },
                     },
                   }}
                 />
               </div>
             </div>
-            <div tw="text-red-500">{error}</div>
+            <div tw="text-red-500 items-center p-8 text-xl">{error}</div>
           </div>
         </div>
       </div>
-      <StickyFooter onClickNext={onClickNext} checkoutStage={2} />
+      <StickyFooter
+        loading={loading}
+        onClickNext={onClickNext}
+        checkoutStage={2}
+      />
     </>
   )
 }

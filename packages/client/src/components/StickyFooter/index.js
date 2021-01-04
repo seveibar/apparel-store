@@ -7,10 +7,16 @@ import { useRecoilState } from "recoil"
 import cartAtom from "../../recoil/cart-atom"
 import { useHistory } from "react-router-dom"
 import AnimatedNumber from "react-animated-number"
+import SyncLoader from "react-spinners/SyncLoader"
 
 const formatMoney = (m) => m.toFixed(2) // TODO toLocale for > $1,000
 
-export const StickyFooter = ({ onClickNext, checkoutStage = 1 }) => {
+export const StickyFooter = ({
+  onClickNext,
+  checkoutStage = 1,
+  error,
+  loading,
+}) => {
   const history = useHistory()
   const [cart, setCart] = useRecoilState(cartAtom)
 
@@ -26,7 +32,7 @@ export const StickyFooter = ({ onClickNext, checkoutStage = 1 }) => {
     <>
       <div tw="h-32" />
       <div
-        style={{ bottom: cart.length ? 0 : -50, transition: "bottom 250ms" }}
+        style={{ bottom: cart.length ? 0 : -100, transition: "bottom 250ms" }}
         tw="fixed w-full border-t-2 bg-white p-8"
       >
         <div tw="container mx-auto flex items-center">
@@ -45,6 +51,7 @@ export const StickyFooter = ({ onClickNext, checkoutStage = 1 }) => {
             ({cart.length} items)
           </div>
           <div tw="flex-grow"></div>
+          {error && <div tw="text-red-500 text-xl items-center">{error}</div>}
           {checkoutStage === 1 && (
             <>
               <button
@@ -68,8 +75,14 @@ export const StickyFooter = ({ onClickNext, checkoutStage = 1 }) => {
                 onClick={onClickNext}
                 tw="flex rounded bg-green-600 text-white p-2 px-4 font-semibold text-xl items-center"
               >
-                <ReviewOrderIcon />
-                Review Order
+                {loading ? (
+                  <SyncLoader color="#fff" size={14} />
+                ) : (
+                  <>
+                    <ReviewOrderIcon />
+                    Review Order
+                  </>
+                )}
               </button>
             </>
           )}
@@ -79,7 +92,11 @@ export const StickyFooter = ({ onClickNext, checkoutStage = 1 }) => {
                 onClick={onClickNext}
                 tw="flex rounded bg-green-600 text-white p-2 px-4 font-semibold text-xl items-center"
               >
-                Confirm Purchase
+                {loading ? (
+                  <SyncLoader color="#fff" size={14} />
+                ) : (
+                  "Confirm Purchase"
+                )}
               </button>
             </>
           )}

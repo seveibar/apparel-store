@@ -3,7 +3,7 @@ const { Schema } = mongoose
 
 const OrderSchema = new Schema()
 OrderSchema.add({
-  totalCost: { type: Number },
+  totalCostCents: { type: Number },
   customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
   items: {
     type: Array,

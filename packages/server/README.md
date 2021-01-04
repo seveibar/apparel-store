@@ -16,6 +16,10 @@ Express/mongoose API server for Apparel Store.
 - `InventoryItem` - An item in the store's inventory
 - `Order` - An order from a customer, including all purchased items
 
+## Notes
+
+- The endpoints and tests directory would get messy as if this project progressed. It would be better to organize the tests with the endpoints
+
 ## Appendix
 
 ### POST Customer Parameters

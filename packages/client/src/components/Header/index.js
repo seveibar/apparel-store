@@ -11,12 +11,12 @@ export const Header = () => {
   return (
     <div tw="border-b-2">
       <div tw="container flex mx-auto">
-        <div tw="px-4 py-4">
+        <a href="/" tw="px-4 py-4">
           <div tw="text-4xl font-extrabold text-gray-900">Apparel Store</div>
           <div tw="text-xl font-bold text-gray-600 py-1">
             Buy clothes you can wear!
           </div>
-        </div>
+        </a>
         <div tw="flex-grow"></div>
         <div tw="flex flex-shrink flex-grow-0 items-center justify-center">
           <button

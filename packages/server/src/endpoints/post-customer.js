@@ -59,8 +59,10 @@ module.exports = asyncHandler(async (req, res) => {
           name: firstName + " " + lastName,
           phone,
         },
+        payment_method: paymentMethodId,
       })
     } catch (e) {
+      if (!e.status) throw e
       return res
         .status(e.response.status)
         .send(`Stripe Error with code: ${e.response.statusText}`)
