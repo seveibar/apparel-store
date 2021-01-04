@@ -2,26 +2,31 @@ import React from "react"
 import { useCallback } from "react"
 import tw from "twin.macro"
 import CheckoutIcon from "./CheckoutIcon.js"
-import { useRecoilValue } from "recoil"
+import ReviewOrderIcon from "./ReviewOrderIcon.js"
+import { useRecoilState } from "recoil"
 import cartAtom from "../../recoil/cart-atom"
 import { useHistory } from "react-router-dom"
 import AnimatedNumber from "react-animated-number"
 
 const formatMoney = (m) => m.toFixed(2) // TODO toLocale for > $1,000
 
-export const StickyFooter = () => {
+export const StickyFooter = ({ onClickNext, checkoutStage = 1 }) => {
   const history = useHistory()
-  const cart = useRecoilValue(cartAtom)
+  const [cart, setCart] = useRecoilState(cartAtom)
 
   const onClickCheckout = useCallback(() => {
     history.push("/checkout")
   }, [history])
 
+  const onClickClearCart = useCallback(() => {
+    setCart([])
+  })
+
   return (
     <>
-      <div tw="h-64" />
+      <div tw="h-32" />
       <div
-        style={{ bottom: cart.length ? 0 : -100, transition: "bottom 250ms" }}
+        style={{ bottom: cart.length ? 0 : -50, transition: "bottom 250ms" }}
         tw="fixed w-full border-t-2 bg-white p-8"
       >
         <div tw="container mx-auto flex items-center">
@@ -40,13 +45,44 @@ export const StickyFooter = () => {
             ({cart.length} items)
           </div>
           <div tw="flex-grow"></div>
-          <button
-            onClick={onClickCheckout}
-            tw="flex bg-green-600 text-white p-2 px-4 font-semibold text-xl items-center"
-          >
-            <CheckoutIcon />
-            <div>Checkout</div>
-          </button>
+          {checkoutStage === 1 && (
+            <>
+              <button
+                onClick={onClickClearCart}
+                tw="flex rounded bg-red-500 text-white p-2 px-4 text-xl items-center mr-2"
+              >
+                <div>Clear Cart</div>
+              </button>
+              <button
+                onClick={onClickCheckout}
+                tw="flex rounded bg-green-600 text-white p-2 px-4 font-semibold text-xl items-center"
+              >
+                <CheckoutIcon />
+                <div>Checkout</div>
+              </button>
+            </>
+          )}
+          {checkoutStage === 2 && (
+            <>
+              <button
+                onClick={onClickNext}
+                tw="flex rounded bg-green-600 text-white p-2 px-4 font-semibold text-xl items-center"
+              >
+                <ReviewOrderIcon />
+                Review Order
+              </button>
+            </>
+          )}
+          {checkoutStage === 3 && (
+            <>
+              <button
+                onClick={onClickNext}
+                tw="flex rounded bg-green-600 text-white p-2 px-4 font-semibold text-xl items-center"
+              >
+                Confirm Purchase
+              </button>
+            </>
+          )}
         </div>
       </div>
     </>

@@ -21,13 +21,13 @@ export const Header = () => {
         <div tw="flex flex-shrink flex-grow-0 items-center justify-center">
           <button
             onClick={onClickAbout}
-            tw="mx-2 border border-gray-300 font-semibold rounded-md text-gray-700 py-2 px-4"
+            tw="mx-2 font-semibold rounded-md text-gray-600 py-2 px-4"
           >
             About Us
           </button>
           <button
             onClick={onClickSignIn}
-            tw="mx-2 border border-gray-300 font-semibold rounded-md text-gray-700 py-2 px-4"
+            tw="mx-2 font-semibold rounded-md text-gray-600 py-2 px-4"
           >
             Sign In
           </button>

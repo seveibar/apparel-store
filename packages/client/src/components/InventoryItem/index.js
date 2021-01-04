@@ -7,16 +7,17 @@ export const InventoryItem = ({ title, imageSrc, _id: productId, price }) => {
   const [cartState, setCartState] = useRecoilState(cartAtom)
 
   const numberInCart =
-    cartState.find((item) => item.productId === productId)?.quantity ?? 0
+    cartState.find((item) => item._id === productId)?.quantity ?? 0
 
   const onAddItem = useCallback(() => {
-    if (cartState.map((item) => item.productId).includes(productId)) {
+    if (cartState.map((item) => item._id).includes(productId)) {
       setCartState(
         cartState.map((item) =>
-          item.productId !== productId
+          item._id !== productId
             ? item
             : {
-                productId: productId,
+                _id: productId,
+                title,
                 quantity: item.quantity + 1,
                 price: (item.quantity + 1) * price,
               }
@@ -26,7 +27,8 @@ export const InventoryItem = ({ title, imageSrc, _id: productId, price }) => {
       setCartState(
         cartState.concat([
           {
-            productId,
+            _id: productId,
+            title,
             quantity: 1,
             price,
           },
