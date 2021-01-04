@@ -2,7 +2,6 @@
   "name": "apparel-store",
   "private": true,
   "scripts": {
-    "start": "npm run start:database",
     "start:database": "docker run --net -d host mongo"
   },
   "devDependencies": {

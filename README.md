@@ -4,6 +4,11 @@ Build a multi-step customer checkout experience using React, Express, Node and t
 
 ## Getting Started
 
+1. Run `npx lerna bootstrap`
+2. Now run `npx lerna run start`
+
+> If you aren't already running a local version of mongodb, run npm run start:database
+
 ## Motivation
 
 This repository was created as part of a timed skill assessment (weekend challenge).

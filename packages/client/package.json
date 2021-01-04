@@ -1,7 +1,6 @@
 {
-  "name": "client",
+  "name": "apparel-store-client",
   "version": "0.1.0",
-  "private": true,
   "proxy": "http://localhost:3001",
   "dependencies": {
     "@emotion/babel-plugin-jsx-pragmatic": "^0.1.5",

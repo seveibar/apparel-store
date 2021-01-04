@@ -1,9 +1,10 @@
 {
-  "name": "server",
+  "name": "apparel-store-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "license": "MIT",
   "scripts": {
+    "start": "node server.js",
     "test": "ava tests/**.test.js"
   },
   "dependencies": {
